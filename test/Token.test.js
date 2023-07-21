@@ -1,6 +1,7 @@
 const { expect, assert } = require("chai")
 //const { ethers } = require("ethers")
 const { ethers } = require("hardhat")
+//const { describe, beforeEach } = require("mocha")
 
 function tokens(count) {
     return ethers.parseUnits(count.toString(), "ether")
@@ -9,7 +10,7 @@ function tokens(count) {
 describe("Token contract", function () {
     let Token
     let accounts, deployer, receiver
-    this.beforeEach(async function () {
+    beforeEach(async function () {
         Token = await hre.ethers.deployContract("Token", [
             "Gercoin",
             "GER",
@@ -20,6 +21,7 @@ describe("Token contract", function () {
         accounts = await ethers.getSigners()
         deployer = accounts[0]
         receiver = accounts[1]
+        exchange = accounts[2]
     })
 
     describe("Deployment", function () {
@@ -115,6 +117,45 @@ describe("Token contract", function () {
                 const amount = tokens(10)
                 await expect(
                     Token.connect(deployer).transfer(
+                        "0x0000000000000000000000000000000000000000",
+                        amount
+                    )
+                ).to.be.reverted
+            })
+        })
+    })
+
+    describe("Approving Tokens", function () {
+        let amount, tx, result
+        beforeEach(async () => {
+            amount = tokens(100)
+            tx = await Token.connect(deployer).approve(exchange.address, amount)
+            result = await tx.wait()
+        })
+
+        describe("Success", function () {
+            it("allocates an allowance for delegated token spending", async () => {
+                expect(
+                    await Token.allowance(deployer.address, exchange.address)
+                ).to.equal(amount)
+            })
+
+            it("emits an Approval event", async () => {
+                expect(
+                    await Token.connect(deployer).approve(
+                        exchange.address,
+                        amount
+                    )
+                )
+                    .to.emit("Token", "Approval")
+                    .withArgs(deployer.address, exchange.address, amount)
+            })
+        })
+        describe("Failure", function () {
+            it("rejects invalid spenders", async () => {
+                //const amount = tokens(10)
+                await expect(
+                    Token.connect(deployer).approve(
                         "0x0000000000000000000000000000000000000000",
                         amount
                     )
