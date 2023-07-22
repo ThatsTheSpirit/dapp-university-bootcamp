@@ -163,4 +163,84 @@ describe("Token contract", function () {
             })
         })
     })
+
+    describe("Delegated Token Transfers", () => {
+        let amount, tx, result
+
+        beforeEach(async () => {
+            amount = tokens(100)
+            tx = await Token.connect(deployer).approve(exchange.address, amount)
+            result = await tx.wait()
+        })
+
+        describe("Success", () => {
+            // beforeEach(async () => {
+            //     tx = await Token.connect(exchange).transferFrom(
+            //         deployer.address,
+            //         receiver.address,
+            //         amount
+            //     )
+            //     result = await tx.wait()
+            // })
+
+            it("transfers token balances", async () => {
+                await expect(
+                    Token.connect(exchange).transferFrom(
+                        deployer.address,
+                        receiver.address,
+                        amount
+                    )
+                ).to.changeTokenBalances(
+                    Token,
+                    [deployer.address, receiver.address],
+                    [-amount, amount]
+                )
+
+                // expect(await Token.balanceOf(deployer.address)).to.be.equal(
+                //     ethers.parseUnits("999900", "ether")
+                // )
+                // expect(await Token.balanceOf(receiver.address)).to.be.equal(
+                //     amount
+                // )
+            })
+
+            it("resets the allowance", async () => {
+                tx = await Token.connect(exchange).transferFrom(
+                    deployer.address,
+                    receiver.address,
+                    amount
+                )
+                result = await tx.wait()
+
+                expect(
+                    await Token.allowance(deployer.address, exchange.address)
+                ).to.be.equal(0)
+            })
+
+            it("emits a Transfer event", async () => {
+                expect(
+                    await Token.connect(exchange).transferFrom(
+                        deployer.address,
+                        receiver.address,
+                        amount
+                    )
+                )
+                    .to.emit(Token, "Transfer")
+                    .withArgs(deployer.address, receiver.address, amount)
+            })
+        })
+        describe("Failure", () => {
+            const invalidAmount = tokens(100000000)
+
+            it("rejects invalid balance transfers", async () => {
+                await expect(
+                    Token.connect(exchange).transferFrom(
+                        deployer.address,
+                        receiver.address,
+                        invalidAmount
+                    )
+                ).to.be.reverted
+            })
+        })
+    })
 })
