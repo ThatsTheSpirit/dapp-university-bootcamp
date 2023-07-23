@@ -7,10 +7,10 @@ function tokens(count) {
     return ethers.parseUnits(count.toString(), "ether")
 }
 
-describe("Token contract", function () {
+describe("Token contract", () => {
     let Token
     let accounts, deployer, receiver
-    beforeEach(async function () {
+    beforeEach(async () => {
         Token = await hre.ethers.deployContract("Token", [
             "Gercoin",
             "GER",
@@ -24,34 +24,34 @@ describe("Token contract", function () {
         exchange = accounts[2]
     })
 
-    describe("Deployment", function () {
+    describe("Deployment", () => {
         const name = "Gercoin",
             symbol = "GER",
             decimals = 18,
             totalSupply = tokens(1000000)
 
-        it("has correct name", async function () {
+        it("has correct name", async () => {
             assert.equal(await Token.name(), name)
         })
 
-        it("has correct symbol", async function () {
+        it("has correct symbol", async () => {
             assert.equal(await Token.symbol(), symbol)
         })
 
-        it("has correct decimals", async function () {
+        it("has correct decimals", async () => {
             assert.equal(await Token.decimals(), decimals)
         })
 
-        it("has correct totalSupply", async function () {
+        it("has correct totalSupply", async () => {
             assert.equal(await Token.totalSupply(), totalSupply)
         })
 
-        it("assigns total supply to deployer", async function () {
+        it("assigns total supply to deployer", async () => {
             assert.equal(await Token.balanceOf(deployer.address), totalSupply)
         })
     })
 
-    describe("Sending Token", function () {
+    describe("Sending Token", () => {
         let amount, tx, result, connectedToken
 
         describe("Success", () => {
@@ -60,7 +60,7 @@ describe("Token contract", function () {
 
                 connectedToken = Token.connect(deployer)
             })
-            it("transfers token balances", async function () {
+            it("transfers token balances", async () => {
                 const deployerBalanceBefore = await Token.balanceOf(
                     deployer.address
                 )
@@ -125,7 +125,7 @@ describe("Token contract", function () {
         })
     })
 
-    describe("Approving Tokens", function () {
+    describe("Approving Tokens", () => {
         let amount, tx, result
         beforeEach(async () => {
             amount = tokens(100)
@@ -133,7 +133,7 @@ describe("Token contract", function () {
             result = await tx.wait()
         })
 
-        describe("Success", function () {
+        describe("Success", () => {
             it("allocates an allowance for delegated token spending", async () => {
                 expect(
                     await Token.allowance(deployer.address, exchange.address)
@@ -151,7 +151,7 @@ describe("Token contract", function () {
                     .withArgs(deployer.address, exchange.address, amount)
             })
         })
-        describe("Failure", function () {
+        describe("Failure", () => {
             it("rejects invalid spenders", async () => {
                 //const amount = tokens(10)
                 await expect(
