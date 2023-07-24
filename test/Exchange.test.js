@@ -68,8 +68,33 @@ describe("Exchange contract", () => {
 
             it("tracks the token deposit", async () => {
                 expect(await token1.balanceOf(exchange.target)).to.equal(amount)
+                expect(
+                    await exchange.tokens(token1.target, user1.address)
+                ).to.equal(amount)
+                expect(
+                    await exchange.balanceOf(token1.target, user1.address)
+                ).to.equal(amount)
+            })
+
+            it("emits a Deposit event", async () => {
+                const filter = exchange.filters.Deposit
+                const events = await exchange.queryFilter(filter, -1)
+                const event = events[0]
+
+                expect(event.fragment.name).to.equal("Deposit")
+                const args = event.args
+                expect(args.token).to.equal(token1.target)
+                expect(args.user).to.equal(user1.address)
+                expect(args.amount).to.equal(amount)
+                expect(args.balance).to.equal(amount)
             })
         })
-        describe("Failure", () => {})
+        describe("Failure", () => {
+            it("fails when no tokens approved", async () => {
+                await expect(
+                    exchange.connect(user1).depositToken(token1.target, amount)
+                ).to.be.revertedWith("Insufficient allowance")
+            })
+        })
     })
 })

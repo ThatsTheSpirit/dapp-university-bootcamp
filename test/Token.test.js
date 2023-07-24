@@ -97,7 +97,7 @@ describe("Token contract", () => {
                 // assert.equal(args._to, receiver.address)
                 // assert.equal(args._value, amount)
                 expect(await connectedToken.transfer(receiver.address, amount))
-                    .to.emit("Token", "Transfer")
+                    .to.emit(Token, "Transfer")
                     .withArgs(deployer.address, receiver.address, amount)
             })
         })
