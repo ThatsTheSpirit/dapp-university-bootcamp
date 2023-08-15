@@ -17,6 +17,11 @@ describe("Exchange contract", () => {
             "GER",
             1000000,
         ])
+        token2 = await hre.ethers.deployContract("Token", [
+            "Mock Dai",
+            "mDAI",
+            1000000,
+        ])
 
         await token1.waitForDeployment()
 
@@ -176,6 +181,61 @@ describe("Exchange contract", () => {
             expect(
                 await exchange.balanceOf(token1.target, user1.address)
             ).to.equal(amount)
+        })
+    })
+
+    describe("Making orders", () => {
+        let tx,
+            result,
+            amount = tokens(1)
+        describe("Success", () => {
+            //Deposit before
+            beforeEach(async () => {
+                tx = await token1
+                    .connect(user1)
+                    .approve(exchange.target, amount)
+                result = await tx.wait()
+                // Deposit token
+                tx = await exchange
+                    .connect(user1)
+                    .depositToken(token1.target, amount)
+                result = await tx.wait()
+
+                tx = await exchange
+                    .connect(user1)
+                    .makeOrder(token2.target, amount, token1.target, amount)
+                result = await tx.wait()
+            })
+
+            it("tracks the newly created order", async () => {
+                expect(await exchange.ordersCount()).to.equal(1)
+            })
+
+            it("emits an Order event", async () => {
+                const filter = exchange.filters.Order
+                const events = await exchange.queryFilter(filter, -1)
+                const event = events[0]
+
+                expect(event.fragment.name).to.equal("Order")
+                const args = event.args
+                expect(args.id).to.equal(1)
+                expect(args.user).to.equal(user1.address)
+                expect(args.tokenGet).to.equal(token2.target)
+                expect(args.amountGet).to.equal(amount)
+                expect(args.tokenGive).to.equal(token1.target)
+                expect(args.amountGive).to.equal(amount)
+                expect(args.timestamp).to.at.least(1)
+            })
+        })
+
+        describe("Failure", () => {
+            it("rejects with no balance", async () => {
+                await expect(
+                    exchange
+                        .connect(user1)
+                        .makeOrder(token2.target, amount, token1.target, amount)
+                ).to.be.reverted
+            })
         })
     })
 })
