@@ -1,9 +1,8 @@
 const { expect, assert } = require("chai")
 const { ethers } = require("hardhat")
+const { tokens } = require("../scripts/utils")
 
-function tokens(count) {
-    return ethers.parseUnits(count.toString(), "ether")
-}
+
 
 describe("Exchange contract", () => {
     let exchange, token1
