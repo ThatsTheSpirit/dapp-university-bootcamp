@@ -23,7 +23,7 @@ function App() {
 
         //Token Smart Contract
 
-        await loadToken(config[chainId]["DApp"]["address"], provider, dispatch)
+        await loadTokens(config[chainId]["DApp"]["address"], provider, dispatch)
         // const token = new ethers.Contract(
         //     config[chainId]["DApp"]["address"],
         //     tokenAbi,
