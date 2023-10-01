@@ -4,7 +4,8 @@ import {
     loadProvider,
     loadNetwork,
     loadAccount,
-    loadToken,
+    loadTokens,
+    loadExchange,
 } from "../store/interactions"
 
 const config = require("../config.json")
@@ -14,21 +15,21 @@ function App() {
     const dispatch = useDispatch()
 
     const loadBlockchainData = async () => {
-        await loadAccount(dispatch)
-
         //Connect Ethers to
         const provider = loadProvider(dispatch)
-
+        //Fetch current network's chain id
         const chainId = await loadNetwork(provider, dispatch)
+        //Fetch current account and balance from metamask
+        await loadAccount(provider, dispatch)
 
         //Token Smart Contract
+        const DApp = config[chainId]["DApp"]
+        const mETH = config[chainId]["mETH"]
+        await loadTokens(provider, [DApp.address, mETH.address], dispatch)
 
-        await loadTokens(config[chainId]["DApp"]["address"], provider, dispatch)
-        // const token = new ethers.Contract(
-        //     config[chainId]["DApp"]["address"],
-        //     tokenAbi,
-        //     provider
-        // )
+        //Load exchange smart contract
+        const exchangeConfig = config[chainId]["Exchange"]
+        await loadExchange(provider, exchangeConfig.address, dispatch)
     }
 
     useEffect(() => {

@@ -2,8 +2,6 @@ const { expect, assert } = require("chai")
 const { ethers } = require("hardhat")
 const { tokens } = require("../scripts/utils")
 
-
-
 describe("Exchange contract", () => {
     let exchange, token1
     let accounts, deployer, feeAccount, user1, user2
