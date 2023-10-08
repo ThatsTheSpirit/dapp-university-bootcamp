@@ -8,6 +8,7 @@ import {
     loadExchange,
 } from "../store/interactions"
 import Navbar from "./Navbar"
+import Markets from "./Markets"
 
 const config = require("../config.json")
 
@@ -21,7 +22,9 @@ function App() {
         const chainId = await loadNetwork(provider, dispatch)
 
         //Reload page when network changes
-        window.ethereum.on("chainChanged", ()=>{window.location.reload()})
+        window.ethereum.on("chainChanged", () => {
+            window.location.reload()
+        })
 
         //Fetch current account and balance from metamask
         window.ethereum.on("accountsChanged", () => {
@@ -47,7 +50,7 @@ function App() {
             <Navbar />
             <main className="exchange grid">
                 <section className="exchange__section--left grid">
-                    {/* Markets */}
+                    <Markets />
                     {/* Balance */}
                     {/* Order */}
                 </section>
