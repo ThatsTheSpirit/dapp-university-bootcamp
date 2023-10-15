@@ -74,6 +74,7 @@ const Navbar = () => {
                     >
                         {account.slice(0, 5)}...{account.slice(38, 42)}
                         <Blockies
+                            seed={account}
                             account={account}
                             className="identicon"
                             size={10}
