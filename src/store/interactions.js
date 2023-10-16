@@ -71,6 +71,10 @@ export const subscribeToEvents = (exchange, dispatch) => {
     exchange.on("Deposit", (token, user, amount, balance, event) => {
         dispatch({ type: "TRANSFER_SUCCESS", event })
     })
+
+    exchange.on("Withdraw", (token, user, amount, balance, event) => {
+        dispatch({ type: "TRANSFER_SUCCESS", event })
+    })
 }
 
 // ---------------------------------------------------------------
@@ -92,14 +96,20 @@ export const transferTokens = async (
         const signer = await provider.getSigner()
         const amountToTransfer = ethers.parseUnits(amount.toString(), 18)
 
-        tx = await token
-            .connect(signer)
-            .approve(exchange.target, amountToTransfer)
-        await tx.wait()
+        if (transferType === "Deposit") {
+            tx = await token
+                .connect(signer)
+                .approve(exchange.target, amountToTransfer)
+            await tx.wait()
 
-        tx = await exchange
-            .connect(signer)
-            .depositToken(token.target, amountToTransfer)
+            tx = await exchange
+                .connect(signer)
+                .depositToken(token.target, amountToTransfer)
+        } else {
+            tx = await exchange
+                .connect(signer)
+                .withdrawToken(token.target, amountToTransfer)
+        }
 
         await tx.wait()
     } catch (error) {
