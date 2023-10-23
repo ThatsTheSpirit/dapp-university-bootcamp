@@ -11,6 +11,7 @@ import {
 import Navbar from "./Navbar"
 import Markets from "./Markets"
 import Balance from "./Balance"
+import Order from "./Order"
 
 const config = require("../config.json")
 
@@ -61,7 +62,7 @@ function App() {
                 <section className="exchange__section--left grid">
                     <Markets />
                     <Balance />
-                    {/* Order */}
+                    <Order/>
                 </section>
                 <section className="exchange__section--right grid">
                     {/* PriceChart  */}
